@@ -37,6 +37,8 @@ app.get("/youtube", async (req, res) => {
 });
 
 app.post("/save-topic", async (req, res) => {
+ console.log(req.body);
+ 
   try {
     const {
       topic,
