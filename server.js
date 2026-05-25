@@ -18,28 +18,12 @@ app.get("/", (req, res) => {
   res.send("Backend Running");
 });
 
-app.get("/youtube", async (req, res) => {
-  const keyword = req.query.q;
-
-  try {
-    const response = await fetch(
-      `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${keyword}&maxResults=10&type=video&key=${process.env.YOUTUBE_API_KEY}`
-    );
-
-    const data = await response.json();
-
-    res.json(data);
-  } catch (error) {
-    res.status(500).json({
-      error: "YouTube API failed",
-    });
-  }
-});
-
 app.post("/save-topic", async (req, res) => {
- console.log(req.body);
- 
+
+  console.log("BODY:", req.body);
+
   try {
+
     const {
       topic,
       search_interest,
@@ -58,27 +42,39 @@ app.post("/save-topic", async (req, res) => {
           upload_pressure,
           opportunity,
         },
-      ]);
+      ])
+      .select();
+
+    console.log("DATA:", data);
+    console.log("ERROR:", error);
 
     if (error) {
       return res.status(500).json({
+        success: false,
         error: error.message,
       });
     }
 
-    res.json({
+    return res.json({
       success: true,
       data,
     });
+
   } catch (err) {
-    res.status(500).json({
-      error: "Database insert failed",
+
+    console.log("SERVER ERROR:", err);
+
+    return res.status(500).json({
+      success: false,
+      error: err.message,
     });
   }
 });
 
 app.get("/topics", async (req, res) => {
+
   try {
+
     const { data, error } = await supabase
       .from("topic_snapshots")
       .select("*")
@@ -91,7 +87,9 @@ app.get("/topics", async (req, res) => {
     }
 
     res.json(data);
+
   } catch (err) {
+
     res.status(500).json({
       error: "Fetch failed",
     });
